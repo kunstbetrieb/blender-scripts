@@ -5,3 +5,5 @@ Everyday helpers for digital production at [Kunstbetrieb](https://www.kunstbetri
 ## Usage
 
 Copy the script into your blendfile and make necessary changes to the properties section
+
+![](./assets/cutter-setup.png)
