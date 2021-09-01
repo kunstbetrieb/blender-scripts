@@ -1,16 +1,22 @@
 import bpy
+import pathlib
 
 def new_collection(name):
     col = bpy.data.collections.new(name)
     bpy.context.scene.collection.children.link(col)
     return col
     
+# PROPERTIES
 
 subject = bpy.data.objects['Cylinder']
 cutters = bpy.data.collections['cutters'].objects.values()
+cutter_thickness = 1e-5
+output_path = 'parts-obj'
+
+# INIT
 
 tmp_col = new_collection('TMP')
-
+res_col = new_collection('RESULT')
 bpy.ops.object.select_all(action='DESELECT')
 
 # JOIN ALL CUTTERS
@@ -29,11 +35,10 @@ bpy.ops.object.join()
 # APPLY SOLIDIFY MODIFIER TO CUTTERS 
 
 m_soli = main_cutter.modifiers.new('SOLI','SOLIDIFY')
-m_soli.thickness = 1e-5
+m_soli.thickness = cutter_thickness
 
-# COPY SUBJECT 
+# COPY SUBJECT TO RESULT COLLECTION 
 
-res_col = new_collection('RESULT')
 res = subject.copy()
 res.data = subject.data.copy()
 res_col.objects.link(res)
@@ -53,13 +58,16 @@ res.select_set(True)
 bpy.ops.mesh.separate(type='LOOSE')
 parts = bpy.data.collections['RESULT'].objects
 
-# SAVE TO DISK
+# SAVE PARTS TO DISK
+
+abs_path = bpy.path.abspath('//')
+export_path = pathlib.Path(abs_path) / output_path
 
 for p in parts:
     bpy.ops.object.select_all(action='DESELECT')
     p.select_set(True)
     bpy.ops.export_scene.obj(
-        filepath=f"/home/alex/Projects/00-blender-sandbox/output/{p.name}.obj",
+        filepath=export_path.absolute() / f"{p.name}.obj",
         use_selection=True,
         use_materials=False
     )
