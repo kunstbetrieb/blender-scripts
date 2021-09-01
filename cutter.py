@@ -8,8 +8,8 @@ def new_collection(name):
     
 # PROPERTIES
 
-subject = bpy.data.objects['Cylinder']
-cutters = bpy.data.collections['cutters'].objects.values()
+subject = bpy.data.objects['Subject']
+cutters = bpy.data.collections['Cutters'].objects.values()
 cutter_thickness = 1e-5
 output_path = 'parts-obj'
 
@@ -62,12 +62,28 @@ parts = bpy.data.collections['RESULT'].objects
 
 abs_path = bpy.path.abspath('//')
 export_path = pathlib.Path(abs_path) / output_path
+export_path.mkdir(parents=True, exist_ok=True)
 
 for p in parts:
     bpy.ops.object.select_all(action='DESELECT')
     p.select_set(True)
     bpy.ops.export_scene.obj(
-        filepath=export_path.absolute() / f"{p.name}.obj",
+        filepath=str(export_path.absolute() / f"{p.name}.obj"),
         use_selection=True,
         use_materials=False
     )
+
+# CLEAN UP
+
+for o in tmp_col.objects:
+    bpy.data.objects.remove(o, do_unlink=True)
+
+for o in res_col.objects:
+    bpy.data.objects.remove(o, do_unlink=True)
+
+for c in [tmp_col, res_col]:
+    bpy.data.collections.remove(c)
+    
+for block in bpy.data.meshes:
+    if block.users == 0:
+        bpy.data.meshes.remove(block)
